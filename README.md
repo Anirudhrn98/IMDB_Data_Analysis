@@ -10,7 +10,9 @@ Instructor Name : Micheal Mior
 
 # 
 
-The repository contains implementation details regarding the following topics of Data Analysis 
+The repository contains implementation details regarding the following topics of Data Analysis. The dataset used for this coursework is the IMDB Dataset which can be referenced by using the following link 
+
+`https://www.imdb.com/interfaces`
 
 1. Designing Relational Model
 2. Creating Database
