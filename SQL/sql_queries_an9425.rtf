@@ -1,0 +1,404 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fmodern\fcharset0 Courier;\f1\fmodern\fcharset0 Courier-Oblique;}
+{\colortbl;\red255\green255\blue255;\red109\green109\blue109;\red32\green32\blue32;\red191\green100\blue38;
+\red153\green168\blue186;\red133\green96\blue154;\red88\green118\blue71;\red254\green187\blue91;\red86\green132\blue173;
+}
+{\*\expandedcolortbl;;\csgenericrgb\c42745\c42745\c42745;\csgenericrgb\c12549\c12549\c12549;\csgenericrgb\c74902\c39216\c14902;
+\csgenericrgb\c60000\c65882\c72941;\csgenericrgb\c52157\c37647\c60392;\csgenericrgb\c34510\c46275\c27843;\csgenericrgb\c99608\c73333\c35686;\csgenericrgb\c33725\c51765\c67843;
+}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs26 \cf2 \cb3 -- Creating raw tables to store the data and modify the data as required\
+\
+\cf4 CREATE TABLE \cf5 Title_raw(\
+   \cf6 tid \cf4 varchar primary key,\
+   \cf6 titleType \cf4 varchar,\
+   \cf6 primaryTitle \cf4 varchar,\
+   \cf6 original_title \cf4 varchar,\
+   \cf6 isAdult \cf4 varchar,\
+   \cf6 startYear \cf4 varchar,\
+   \cf6 endYear \cf4 varchar,\
+   \cf6 runtimeMinutes \cf4 varchar,\
+   \cf6 genres \cf4 varchar\
+\cf5 )\cf4 ;\cf2 --TIME: 33ms\
+\cf4 copy \cf5 Title_raw \cf4 from \cf7 '/Users/anirudhramesh/Desktop/INTRO TO BIG DATA/ASSN2/data/title_basics.tsv'\
+\cf4 delimiter \cf7 e'\cf5 \\t\cf7 ' \cf4 null \cf7 '\\N' \cf4 csv header quote \cf7 e'\cf5 \\b\cf7 '\cf4 ; \cf2 -- TIME: 27s 893ms\
+\
+\cf4 delete from \cf5 title_raw \cf4 where \cf6 isAdult \cf5 = \cf7 'true'\cf4 ;\cf2 -- TIME: 3s\
+\
+\cf4 update \cf5 Title_raw \cf4 set \cf6 tid \cf5 = 
+\f1\i \cf8 replace 
+\f0\i0 \cf5 (\cf6 tid\cf4 , \cf7 'tt'\cf4 , \cf7 ''\cf5 )\cf4 ;\cf2 -- TIME: 52s 640ms\
+\cf4 alter table \cf5 Title_raw\
+    \cf4 alter column \cf6 tid\
+        \cf4 type integer using\cf5 (\cf6 tid\cf5 ::\cf4 integer\cf5 )\cf4 ; \cf2 -- TIME: 57s 812ms\
+\
+\
+\
+\
+\cf4 CREATE TABLE \cf5 title_principals (\
+    \cf6 id \cf4 varchar,\
+    \cf6 ordering \cf4 int,\
+    \cf6 nid \cf4 varchar,\
+    \cf6 category \cf4 varchar,\
+    \cf6 job \cf4 varchar,\
+    \cf6 characters \cf4 varchar\
+\cf5 )\cf4 ; \cf2 -- TIME: 15ms\
+\
+\cf4 copy \cf5 title_principals \cf4 from \cf7 '/Users/anirudhramesh/Desktop/INTRO TO BIG DATA/ASSN2/data/principals.tsv'\
+\cf4 delimiter \cf7 e'\cf5 \\t\cf7 ' \cf4 null \cf7 '\\N' \cf4 csv header quote \cf7 e'\cf5 \\b\cf7 '\cf4 ; \cf2 -- TIME: 55s 905ms\
+\
+\cf4 update \cf5 title_principals\
+    \cf4 set \cf6 id \cf5 = 
+\f1\i \cf8 replace
+\f0\i0 \cf5 (\cf6 id\cf4 , \cf7 'tt'\cf4 ,\cf7 ''\cf5 )\cf4 ; \cf2 -- TIME: 55s 260ms\
+\
+\cf4 update \cf5 title_principals\
+    \cf4 set \cf6 nid \cf5 = 
+\f1\i \cf8 replace
+\f0\i0 \cf5 (\cf6 nid\cf4 , \cf7 'nm'\cf4 ,\cf7 ''\cf5 )\cf4 ; \cf2 -- TIME: 1m 58s\
+\
+\cf4 alter table \cf5 title_principals\
+    \cf4 alter column \cf6 id \cf4 type integer using \cf5 (\cf6 id\cf5 ::\cf4 integer\cf5 )\cf4 ; \cf2 -- TIME: 3m 56s\
+\
+\cf4 alter table \cf5 title_principals\
+    \cf4 alter column \cf6 nid \cf4 type integer using \cf5 (\cf6 nid\cf5 ::\cf4 integer\cf5 )\cf4 ;\cf2 -- TIME:2m 41s\
+\
+\cf4 update \cf5 title_principals\
+    \cf4 set \cf6 characters \cf5 = 
+\f1\i \cf8 replace
+\f0\i0 \cf5 (\cf6 characters\cf4 , \cf7 '["'\cf4 ,\cf7 ''\cf5 )\cf4 ;\cf2 -- TIME: 1m 24s\
+\
+\cf4 update \cf5 title_principals\
+\cf4 set \cf6 characters \cf5 = 
+\f1\i \cf8 replace
+\f0\i0 \cf5 (\cf6 characters\cf4 , \cf7 '"]'\cf4 ,\cf7 ''\cf5 )\cf4 ; \cf2 -- TIME: 2m 3s\
+\
+\
+\
+\cf4 CREATE TABLE \cf5 name_basics (\
+ \cf6 nid \cf4 varchar primary key ,\
+ \cf6 primaryName \cf4 varchar,\
+ \cf6 birthYear \cf4 varchar,\
+ \cf6 deathYear \cf4 varchar,\
+ \cf6 primaryProfession \cf4 varchar,\
+ \cf6 knownforTitles \cf4 varchar\
+\cf5 )\cf4 ; \cf2 -- TIME: 31ms\
+\
+\cf4 copy \cf5 name_basics \cf4 from \cf7 '/Users/anirudhramesh/Desktop/INTRO TO BIG DATA/ASSN2/data/name_basics.tsv'\
+\cf4 delimiter \cf7 e'\cf5 \\t\cf7 ' \cf4 null \cf7 '\\N' \cf4 csv header quote \cf7 e'\cf5 \\b\cf7 '\cf4 ; \cf2 --TIME: 19s\
+\
+\cf4 update \cf5 name_basics\
+    \cf4 set \cf6 nid \cf5 = 
+\f1\i \cf8 replace
+\f0\i0 \cf5 (\cf6 nid\cf4 , \cf7 'nm'\cf4 , \cf7 ''\cf5 )\cf4 ; \cf2 -- TIME: 47s 365ms\
+\cf4 alter table \cf5 name_basics\
+    \cf4 alter column \cf6 nid \cf4 type integer using \cf5 (\cf6 nid\cf5 ::\cf4 integer\cf5 )\cf4 ;\cf2 -- TIME: 16s 981ms\
+\
+\
+\
+\cf4 CREATE TABLE \cf5 title_ratings (\
+    \cf6 id \cf4 varchar primary key,\
+    \cf6 averagerating \cf4 float,\
+    \cf6 numvotes \cf4 int\
+\cf5 )\cf4 ; \cf2 -- TIME: 29ms\
+\
+\cf4 copy \cf5 title_ratings \cf4 from \cf7 '/Users/anirudhramesh/Desktop/INTRO TO BIG DATA/ASSN2/data/title_ratings.tsv'\
+\cf4 delimiter \cf7 e'\cf5 \\t\cf7 ' \cf4 null \cf7 '\\N' \cf4 csv header quote \cf7 e'\cf5 \\b\cf7 '\cf4 ; \cf2 -- TIME: 1s\
+\
+\cf4 update \cf5 title_ratings\
+\cf4 set \cf6 id \cf5 = 
+\f1\i \cf8 replace 
+\f0\i0 \cf5 (\cf6 id\cf4 ,\cf7 'tt'\cf4 , \cf7 ''\cf5 )\cf4 ;\cf2 -- TIME: 3s 378ms\
+\
+\cf4 alter table \cf5 title_ratings\
+    \cf4 alter column \cf6 id \cf4 type integer using \cf5 (\cf6 id\cf5 ::\cf4 integer\cf5 )\cf4 ; \cf2 -- TIME: 2s 743ms\
+\
+\
+-- CREATING THE TABLES REQUIRED in Q1\
+\
+\
+-- CREATE TITLE\
+\cf4 CREATE TABLE \cf5 title\
+\cf4 AS\
+    SELECT \cf6 tid\cf4 ,\
+           \cf6 titletype\cf4 ,\
+           \cf6 primarytitle\cf4 ,\
+           \cf6 original_title\cf4 ,\
+           \cf6 startyear\cf4 ,\
+           \cf6 endyear\cf4 ,\
+           \cf6 runtimeMinutes\cf4 ,\
+           \cf6 averagerating\cf4 ,\
+           \cf6 numvotes\
+    \cf4 FROM \cf5 Title_raw\
+        \cf4 left join \cf5 title_ratings \cf4 on \cf5 title_raw.\cf6 tid \cf5 = title_ratings.\cf6 id\cf4 ; \cf2 -- TIME: 29s 406ms\
+\
+\cf4 alter table \cf5 title\
+    \cf4 add constraint \cf5 pk_id \cf4 primary key\cf5 (\cf6 tid\cf5 )\cf4 ; \cf2 -- TIME: 20s 55ms\
+\
+\
+-- CREATE GENRE\
+\cf4 CREATE TABLE \cf5 genre (\
+    \cf6 id \cf4 serial primary key,\
+    \cf6 genres \cf4 varchar\
+\cf5 )\cf4 ; \cf2 -- TIME : 41ms\
+\
+\cf4 insert into \cf5 genre(\cf6 genres\cf5 ) (\cf4 select distinct 
+\f1\i \cf8 unnest
+\f0\i0 \cf5 (
+\f1\i \cf8 string_to_array
+\f0\i0 \cf5 (\cf6 genres\cf4 , \cf7 ','\cf5 ))\
+                        \cf4 as \cf5 genres \cf4 from \cf5 title_raw)\cf4 ;\cf2 -- TIME: 4s 56ms\
+\
+\
+-- CREATE TITLE_GENRE\
+\cf4 CREATE TABLE \cf5 title_genre\
+\cf4 as\
+    select \cf5 genre.\cf6 id \cf4 as \cf5 genre\cf4 , \cf6 tid \cf4 as \cf5 title\
+    \cf4 from \cf5 (\cf4 select \cf6 tid\cf4 , 
+\f1\i \cf8 unnest
+\f0\i0 \cf5 (
+\f1\i \cf8 string_to_array
+\f0\i0 \cf5 (\cf6 genres\cf4 , \cf7 ','\cf5 )) \cf4 as \cf5 genres \cf4 from \cf5 title_raw) \cf4 as \cf5 t\
+    \cf4 join \cf5 genre \cf4 on \cf5 genre.\cf6 genres \cf5 = t.genres\cf4 ; \cf2 -- TIME; 18s\
+\
+\cf4 alter table \cf5 title_genre\
+    \cf4 add foreign key \cf5 (\cf6 genre\cf5 ) \cf4 references \cf5 genre(\cf6 id\cf5 )\cf4 ; \cf2 -- TIME: 1s\
+\
+\cf4 alter table \cf5 title_genre\
+    \cf4 add foreign key \cf5 (\cf6 title\cf5 ) \cf4 references \cf5 title(\cf6 tid\cf5 )\cf4 ; \cf2 -- TIME: 5s\
+\
+\cf4 alter table \cf5 title_genre\
+    \cf4 add primary key  \cf5 (\cf6 genre\cf4 , \cf6 title\cf5 )\cf4 ; \cf2 --TIME: 6s 865ms\
+\
+\
+-- CREATE MEMBER\
+\cf4 CREATE TABLE \cf5 member\
+\cf4 as select \cf5 name_basics.\cf6 nid \cf4 as \cf5 id\cf4 ,\
+          \cf5 name_basics.\cf6 primaryName \cf4 as name,\
+          \cf5 name_basics.\cf6 birthYear \cf4 as \cf5 birthYear\cf4 ,\
+          \cf5 name_basics.\cf6 deathyear \cf4 as \cf5 deathYear\
+    \cf4 FROM \cf5 name_basics\cf4 ; \cf2 --TIME: 16s 392ms\
+\
+\cf4 alter table \cf5 member\
+    \cf4 add primary key \cf5 (\cf6 id\cf5 )\cf4 ; \cf2 -- TIME: 7s\
+\
+\
+\
+-- CREATE TITLE_ACTOR\
+\cf4 CREATE TABLE \cf5 Title_actor\
+\cf4 as select distinct \cf6 nid \cf4 as \cf5 actor\cf4 , \cf6 id \cf4 as \cf5 title \cf4 from \cf5 title_principals\
+\cf4 where \cf6 category \cf5 = \cf7 'actor'\
+\cf4 and 
+\f1\i \cf8 exists
+\f0\i0 \cf5 (\cf4 select \cf8 * \cf4 from \cf5 member \cf4 where \cf5 member.\cf6 id \cf5 = title_principals.\cf6 nid\cf5 )\
+\cf4 and 
+\f1\i \cf8 exists 
+\f0\i0 \cf5 (\cf4 select \cf8 * \cf4 from \cf5 title_raw \cf4 where \cf5 title_principals.\cf6 id \cf5 = title_raw.\cf6 tid\cf5 )\cf4 ; \cf2 -- TIME: 34s 312ms\
+\
+\cf4 alter table \cf5 title_actor\
+    \cf4 add foreign key \cf5 (\cf6 actor\cf5 ) \cf4 references \cf5 member(\cf6 id\cf5 )\cf4 ; \cf2 -- TIME: 5s 83ms\
+\cf4 alter table \cf5 title_actor\
+    \cf4 add foreign key \cf5 (\cf6 title\cf5 ) \cf4 references \cf5 title(\cf6 tid\cf5 )\cf4 ; \cf2 -- TIME: 6s 371ms\
+\cf4 alter table \cf5 title_actor\
+    \cf4 add primary key \cf5 (\cf6 actor\cf4 , \cf6 title\cf5 )\cf4 ; \cf2 -- TIME: 6s 895ms\
+\
+\
+-- CREATE TITLE_DIRECTOR\
+\cf4 CREATE TABLE \cf5 Title_director\
+\cf4 as select distinct \cf6 nid \cf4 as \cf5 director\cf4 , \cf6 id \cf4 as \cf5 title \cf4 from \cf5 title_principals\
+\cf4 where \cf6 category \cf5 = \cf7 'director'\
+\cf4 and 
+\f1\i \cf8 exists
+\f0\i0 \cf5 (\cf4 select \cf8 * \cf4 from \cf5 member \cf4 where \cf5 member.\cf6 id \cf5 = title_principals.\cf6 nid\cf5 )\
+\cf4 and 
+\f1\i \cf8 exists 
+\f0\i0 \cf5 (\cf4 select \cf8 * \cf4 from \cf5 title_raw \cf4 where \cf5 title_principals.\cf6 id \cf5 = title_raw.\cf6 tid\cf5 )\cf4 ; \cf2 --TIME: 38s 906ms\
+\
+\cf4 alter table \cf5 title_director\
+    \cf4 add foreign key \cf5 (\cf6 director\cf5 ) \cf4 references \cf5 member(\cf6 id\cf5 )\cf4 ; \cf2 -- TIME: 3s 52ms\
+\cf4 alter table \cf5 title_director\
+    \cf4 add foreign key \cf5 (\cf6 title\cf5 ) \cf4 references \cf5 title(\cf6 tid\cf5 )\cf4 ; \cf2 -- TIME: 4s 88ms\
+\cf4 alter table \cf5 title_director\
+    \cf4 add primary key \cf5 (\cf6 director\cf4 , \cf6 title\cf5 )\cf4 ; \cf2 -- TIME: 5s 587ms\
+\
+\
+-- CREATE TITLE_PRODUCER\
+\cf4 CREATE TABLE \cf5 Title_producer\
+\cf4 as select distinct \cf6 nid \cf4 as \cf5 producer\cf4 , \cf6 id \cf4 as \cf5 title \cf4 from \cf5 title_principals\
+\cf4 where \cf6 category \cf5 = \cf7 'producer'\
+\cf4 and 
+\f1\i \cf8 exists
+\f0\i0 \cf5 (\cf4 select \cf8 * \cf4 from \cf5 member \cf4 where \cf5 member.\cf6 id \cf5 = title_principals.\cf6 nid\cf5 )\
+\cf4 and 
+\f1\i \cf8 exists 
+\f0\i0 \cf5 (\cf4 select \cf8 * \cf4 from \cf5 title_raw \cf4 where \cf5 title_principals.\cf6 id \cf5 = title_raw.\cf6 tid\cf5 )\cf4 ;\cf2 -- TIME: 32s 147ms\
+\
+\cf4 alter table \cf5 title_producer\
+    \cf4 add foreign key \cf5 (\cf6 producer\cf5 ) \cf4 references \cf5 member(\cf6 id\cf5 )\cf4 ; \cf2 -- TIME: 2s 843ms\
+\cf4 alter table \cf5 title_producer\
+    \cf4 add foreign key \cf5 (\cf6 title\cf5 ) \cf4 references \cf5 title(\cf6 tid\cf5 )\cf4 ; \cf2 -- TIME: 2s 994ms\
+\cf4 alter table \cf5 title_producer\
+    \cf4 add primary key \cf5 (\cf6 producer\cf4 , \cf6 title\cf5 )\cf4 ; \cf2 -- TIME: 1s 755ms\
+\
+\
+-- CREATE TITLE_WRITER\
+\cf4 CREATE TABLE \cf5 Title_writer\
+\cf4 as select distinct \cf6 nid \cf4 as \cf5 writer\cf4 , \cf6 id \cf4 as \cf5 title \cf4 from \cf5 title_principals\
+\cf4 where \cf6 category \cf5 = \cf7 'writer'\
+\cf4 and 
+\f1\i \cf8 exists
+\f0\i0 \cf5 (\cf4 select \cf8 * \cf4 from \cf5 member \cf4 where \cf5 member.\cf6 id \cf5 = title_principals.\cf6 nid\cf5 )\
+\cf4 and 
+\f1\i \cf8 exists 
+\f0\i0 \cf5 (\cf4 select \cf8 * \cf4 from \cf5 title_raw \cf4 where \cf5 title_principals.\cf6 id \cf5 = title_raw.\cf6 tid\cf5 )\cf4 ; \cf2 -- TIME: 40s 168ms\
+\
+\cf4 alter table \cf5 title_writer\
+    \cf4 add foreign key \cf5 (\cf6 writer\cf5 ) \cf4 references \cf5 member(\cf6 id\cf5 )\cf4 ; \cf2 -- TIME: 3s 573ms\
+\cf4 alter table \cf5 title_writer\
+    \cf4 add foreign key \cf5 (\cf6 title\cf5 ) \cf4 references \cf5 title(\cf6 tid\cf5 )\cf4 ; \cf2 -- TIME: 4s 251ms\
+\cf4 alter table \cf5 title_writer\
+    \cf4 add primary key \cf5 (\cf6 writer\cf4 , \cf6 title\cf5 )\cf4 ; \cf2 -- TIME: 4s 316ms\
+\
+-- CREATE CHARACTERS\
+\cf4 CREATE TABLE \cf5 characters (\
+    \cf6 id \cf4 serial primary key,\
+    \cf6 characters \cf4 varchar\
+\cf5 )\cf4 ; \cf2 -- TIME: 21ms\
+\cf4 insert into \cf5 Characters (\cf6 Characters\cf5 ) (\cf4 select distinct 
+\f1\i \cf8 unnest
+\f0\i0 \cf5 (
+\f1\i \cf8 string_to_array
+\f0\i0 \cf5 (\cf6 Characters\cf4 , \cf7 '","'\cf5 ))\
+    \cf4 as \cf5 Characters \cf4 from \cf5 title_principals)\cf4 ; \cf2 --TIME: 26s 419ms\
+\
+\
+\
+-- CREATE ACTOR_TITLE_CHARACTER\
+\cf4 CREATE TABLE \cf5 actor_title_character\
+\cf4 as \cf5 (\cf4 select distinct \cf5 t.\cf6 nid \cf4 as \cf5 actor\cf4 , \cf5 t.\cf6 id \cf4 as \cf5 title\cf4 , \cf5 characters.\cf6 id \cf4 as \cf5 characters\
+    \cf4 from \cf5 ((\cf4 select \cf6 id\cf4 , \cf6 nid\cf4 , 
+\f1\i \cf8 unnest
+\f0\i0 \cf5 (
+\f1\i \cf8 string_to_array
+\f0\i0 \cf5 (title_principals.\cf6 characters\cf4 , \cf7 '","'\cf5 )) \cf4 as \cf5 sep\
+          \cf4 from \cf5 title_principals) \cf4 as \cf5 p\
+    \cf4 JOIN \cf5 Title_actor \cf4 on \cf5 p.\cf6 nid \cf5 = Title_actor.\cf6 actor \cf4 and \cf5 p.\cf6 id \cf5 = title_actor.\cf6 title\cf5 ) \cf4 as \cf5 t\
+    \cf4 join \cf5 characters \cf4 on \cf5 t.sep = characters.\cf6 characters\cf5 )\cf4 ;  \cf2 --TIME: 51s 99ms\
+\
+\cf4 alter table \cf5 actor_title_character\
+\cf4 add foreign key \cf5 (\cf6 actor\cf4 , \cf6 title\cf5 ) \cf4 references \cf5 Title_actor(\cf6 actor\cf4 , \cf6 title\cf5 )\cf4 ; \cf2 --TIME: 12s 572ms\
+\cf4 alter table \cf5 actor_title_character\
+\cf4 add foreign key \cf5 (\cf6 characters\cf5 ) \cf4 references \cf5 characters(\cf6 id\cf5 )\cf4 ; \cf2 --TIME: 2s 475ms\
+\
+\
+\
+----- TOTAL TIME: AROUND 35 MINUTES \
+\
+\
+\
+\
+\
+-- QUERY1\
+\cf4 select 
+\f1\i \cf8 count
+\f0\i0 \cf5 (\cf8 *\cf5 ) \cf4 from \cf5 Title_Actor\
+    \cf4 left join \cf5 actor_title_character \cf4 as \cf5 atc \cf4 on \cf5 Title_Actor.\cf6 actor \cf5 = atc.\cf6 actor \cf4 and \cf5 Title_Actor.\cf6 title \cf5 = atc.\cf6 title\
+\cf4 where \cf5 atc.\cf6 characters \cf4 is null;\
+\
+\
+\cf2 -- QUERY2\
+\cf4 SELECT Distinct \cf6 name  \cf4 from\
+    \cf5 ((\cf4 select \cf6 id\cf4 , \cf6 name\cf4 , \cf6 birthYear\cf4 , \cf6 deathYear \cf4 from \cf5 member \cf4 where \cf6 name \cf4 like \cf7 'Phi%' \cf4 and \cf6 deathYear \cf4 is null  \cf5 ) \cf4 as m\
+        join \cf5 title_actor t \cf4 on m\cf5 .\cf6 id \cf5 = t.\cf6 actor\cf5 ) \cf4 as \cf5 p\
+    \cf4 left join \cf5 ((\cf4 select \cf6 tid\cf4 , \cf6 original_title\cf4 , \cf6 startyear \cf4 from \cf5 title \cf4 where \cf6 startYear \cf5 != \cf7 '2014'\cf5 ) \cf4 as \cf5 n\
+        \cf4 join \cf5 title_actor \cf4 on \cf5 n.\cf6 tid \cf5 = Title_actor.\cf6 title\cf5 ) \cf4 as \cf5 p1\
+    \cf4 on \cf5 p1.\cf6 tid \cf5 = p.\cf6 id \cf4 ;\
+\
+\
+\
+\
+\cf2 -- QUERY 3\
+\cf4 select \cf5 counter.\cf6 name\cf4 , 
+\f1\i \cf8 count
+\f0\i0 \cf5 (counter.\cf6 title\cf5 ) \cf4 as \cf5 Counts\
+\cf4 from \cf5 (\cf4 select \cf5 prod.\cf6 title\cf4 , M\cf5 .\cf6 name\
+     \cf4 from \cf5 (\cf4 select \cf5 gen.\cf6 title\cf4 , \cf5 tp.\cf6 producer\cf4 , \cf5 gen.\cf6 startYear\cf4 , \cf5 gen.\cf6 genre\
+           \cf4 from \cf5 (\cf4 select \cf5 tg.\cf6 title\cf4 , \cf5 t.\cf6 startYear\cf4 , \cf5 tg.\cf6 genre\
+                 \cf4 from \cf5 (\cf4 select \cf6 title\cf4 , \cf6 genre\
+                       \cf4 from \cf5 title_genre\
+                       \cf4 where \cf6 genre \cf5 = (\cf4 select \cf6 id\
+                                      \cf4 from \cf5 Genre\
+                                      \cf4 where \cf6 genres \cf5 = \cf7 'Talk-Show'\cf5 )) \cf4 as \cf5 tg\
+                          \cf4 join \cf5 title t \cf4 on \cf5 t.\cf6 tid \cf5 = tg.\cf6 title\
+                 \cf4 where \cf6 startYear \cf5 = \cf7 '2017'\cf5 ) \cf4 as \cf5 gen\
+                    \cf4 join \cf5 Title_Producer tp \cf4 on \cf5 tp.\cf6 title \cf5 = gen.\cf6 title\cf5 ) \cf4 as \cf5 prod\
+              \cf4 join \cf5 member \cf4 M on M\cf5 .\cf6 ID \cf5 = prod.\cf6 producer\
+     \cf4 where M\cf5 .\cf6 name \cf4 like \cf7 '%Gill%'\cf5 ) \cf4 as \cf5 counter\
+\cf4 group by \cf6 Name\
+\cf4 order by \cf5 Counts \cf4 desc;\
+\
+\
+\
+\cf2 -- QUERY 4\
+\cf4 SELECT \cf6 Name\cf4 , 
+\f1\i \cf8 count
+\f0\i0 \cf5 (\cf6 runtimeMinutes\cf5 ) \cf4 as \cf5 counts\
+\cf4 FROM \cf5 (\cf4 SELECT  \cf6 Name\cf4 , \cf5 T.\cf6 runtimeMinutes\
+    \cf4 FROM \cf5 (\cf4 SELECT \cf6 Producer\cf4 , M\cf5 .\cf6 name\cf4 , \cf6 title\
+          \cf4 FROM \cf5 Title_Producer P\
+                   \cf4 JOIN \cf5 Member \cf4 M on \cf5 P.\cf6 Producer \cf5 = \cf4 M\cf5 .\cf6 id\
+          \cf4 WHERE M\cf5 .\cf6 deathYear \cf4 IS NULL\cf5 ) \cf4 AS \cf5 pnt\
+             \cf4 JOIN \cf5 Title T \cf4 on \cf5 pnt.\cf6 Title \cf5 = T.\cf6 tid\
+    \cf4 WHERE 
+\f1\i \cf8 cast
+\f0\i0 \cf5 (T.\cf6 runtimeminutes \cf4 as int\cf5 ) > \cf9 120\cf5 ) \cf4 AS \cf5 nr\
+\cf4 GROUP BY \cf6 Name\
+\cf4 ORDER BY \cf5 counts \cf4 DESC;\
+\
+\
+\cf2 -- QUERY 5\
+\cf4 SELECT \cf6 id\cf4 , \cf6 name\
+\cf4 FROM \cf5 (\cf4 SELECT DISTINCT\cf5 (\cf6 actor\cf5 )\
+     \cf4 FROM \cf5 actor_title_character\cf4 ,\
+          \cf5 (\cf4 SELECT \cf6 id \cf4 FROM \cf5 Characters \cf4 where \cf5 Characters.\cf6 Characters \cf4 like \cf7 'Jesus Christ'\cf5 ) \cf4 AS C\
+     where \cf5 actor_title_character.\cf6 characters \cf5 = \cf4 C\cf5 .\cf6 id\cf5 ) \cf4 AS \cf5 actor\
+        \cf4 JOIN \cf5 member \cf4 ON \cf5 actor = member.\cf6 id\
+\cf4 WHERE \cf6 deathYear \cf4 is NULL;\
+\
+\
+\
+\
+\
+create index \cf5 "index" \cf4 on \cf5 title_actor(\cf6 actor\cf4 ,\cf6 title\cf5 )\cf4 ;\
+\cf2 -- IMPROVED RUNTIME: 5s 232ms\
+\
+\cf4 create index \cf5 "index1" \cf4 on \cf5 title(\cf6 startyear\cf5 )\cf4 ;\
+\cf2 --IMPROVED RUNTIME: 8s 366ms\
+\
+\cf4 create index \cf5 "index2" \cf4 on \cf5 title_genre(\cf6 genre\cf5 )\cf4 ;\
+\cf2 --IMPROVED RUNTIME: 2s 234ms\
+\
+\cf4 create index \cf5 "index3" \cf4 on \cf5 member(\cf6 deathYear\cf5 )\cf4 ;\
+\cf2 --IMPROVED RUNTIME: 5s 312ms\
+\
+\cf4 create index \cf5 "index4" \cf4 on \cf5 characters(\cf6 characters\cf5 )\cf4 ;\
+\cf2 --IMPROVED RUNTIME: 577ms\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+}

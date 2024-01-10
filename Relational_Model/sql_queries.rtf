@@ -1,0 +1,153 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 -- Create initial tables for the dataset and populate them \
+\
+\
+--People information table\
+create table Name_Basics(\
+    nconst varchar primary key,\
+    primary_Name varchar,\
+    birth_Year varchar,\
+    death_Year varchar,\
+    primary_Profession varchar,\
+    knownForTitles varchar);\
+	\
+	\
+-- Rating table\
+create table Ratings(\
+    titleID varchar primary key,\
+    averageRating varchar,\
+    num_Votes varchar);\
+	\
+	\
+-- Title data\
+create table Titles(\
+    title_ID varchar primary key,\
+    title_Type varchar,\
+    primary_Title varchar,\
+    original_Title varchar,\
+    isAdult varchar,\
+    start_Year varchar,\
+    end_Year varchar,\
+    runtime varchar,\
+    genres varchar);\
+\
+\
+-- Table to store data of cast in a movie \
+create table Principals(\
+    tconst varchar,\
+    ordering_1 integer,\
+    nconst varchar,\
+    category varchar,\
+    job varchar,\
+    character_ varchar,\
+    primary key (title_ID, ordering_1));\
+\
+\
+-- Copy from tsv files to database\
+COPY Titles\
+FROM '/Users/anirudhramesh/Desktop/INTRO TO BIG DATA/ASSN1/data/title.basic.tsv'\
+WITH (FORMAT csv, DELIMITER E'\\t', HEADER TRUE, QUOTE E'\\b' ,NULL '\\N'  );\
+\
+COPY Name_Basics\
+FROM '/Users/anirudhramesh/Desktop/INTRO TO BIG DATA/ASSN1/data/name.basic.tsv'\
+WITH (FORMAT csv, DELIMITER E'\\t', HEADER TRUE, QUOTE E'\\b' ,NULL '\\N'  );\
+\
+COPY Principals\
+FROM '/Users/anirudhramesh/Desktop/INTRO TO BIG DATA/ASSN1/data/title.principals.tsv'\
+WITH (FORMAT csv, DELIMITER E'\\t', HEADER TRUE, QUOTE E'\\b' ,NULL '\\N'  );\
+\
+COPY Ratings\
+FROM '/Users/anirudhramesh/Desktop/INTRO TO BIG DATA/ASSN1/data/title.ratings.tsv'\
+WITH (FORMAT csv, DELIMITER E'\\t', HEADER TRUE, QUOTE E'\\b' ,NULL '\\N'  );\
+\
+\
+\
+-- Modify 'tconst' by removing initial tt and converting to int and 'nconst' by removing 'nm' from person_ID.\
+-- alter data type of title_id to integer\
+update Titles set title_id = replace(title_id, 'tt', '');\
+alter table Titles alter column title_id type integer USING (title_id::integer);\
+\
+update Ratings set title_id = replace(titleid, 'tt', '');\
+alter table Ratings alter column titleid type integer USING (titleid::integer);\
+\
+update Principals set tconst = replace(tconst, 'tt', ''),\
+update Principals set nconst = replace(nconst, 'nm', '');\
+alter table Principals alter column tconst type integer USING (tconst::integer),\
+alter column nconst type integer USING (nconst::integer);\
+  \
+update Name_Basics set nconst = replace(nconst, 'nm', '');\
+alter table Name_Basics alter column nconst type integer USING (nconst::integer);\
+\
+\
+\
+\
+-- Remove columns that are not required using alter table\
+\
+ALTER TABLE Titles \
+	DROP COLUMN end_Year,\
+	DROP COLUMN start_Year,\
+	DROP COLUMN isAdult;\
+	\
+\
+ALTER TABLE Name_Basics\
+	DROP COLUMN knownForTitles,\
+	DROP COLUMN primary_Profession;\
+	\
+ALTER TABLE Principals\
+	DROP COLUMN job,\
+	DROP COLUMN character_;\
+\
+\
+\
+-- Create table for actors and add foreign key and performing check to remove error entries \
+CREATE TABLE actors AS\
+SELECT person_id, ordering_1, title_id FROM \
+Principals WHERE category = 'actor' and \
+exists (select * from Name_Basics where Name_Basics.person_id = Principals.person_id)\
+      and exists (select * from Titles where Titles.title_ID = Principals.title_ID);\
+\
+ALTER TABLE actors ADD PRIMARY KEY (title_id, ordering_1), ADD FOREIGN KEY (title_id) references Titles(title_ID),\
+ADD FOREIGN KEY (person_id) REFERENCES Name_Basics(person_id);\
+\
+-- Create table for director and add foreign key and performing check to remove error entries \
+CREATE TABLE directors AS\
+SELECT person_id, ordering_1, title_id FROM \
+Principals WHERE category = 'director' and \
+exists (select * from Name_Basics where Name_Basics.person_id = Principals.person_id)\
+      and exists (select * from Titles where Titles.title_ID = Principals.title_ID);\
+\
+ALTER TABLE directors ADD PRIMARY KEY (title_id, ordering_1),ADD FOREIGN KEY (title_id) references Titles(title_ID),\
+ADD FOREIGN KEY (person_id) REFERENCES Name_Basics(person_id)\
+\
+\
+-- Create table for writers and add foreign key and performing check to remove error entries \
+CREATE TABLE writers AS\
+SELECT person_id, ordering_1, title_id FROM \
+Principals WHERE category = 'writer' and \
+exists (select * from Name_Basics where Name_Basics.person_id = Principals.person_id)\
+      and exists (select * from Titles where Titles.title_ID = Principals.title_ID);\
+\
+ALTER TABLE writers ADD PRIMARY KEY (title_id, ordering_1),ADD FOREIGN KEY (title_id) references Titles(title_ID),\
+ADD FOREIGN KEY (person_id) REFERENCES Name_Basics(person_id)\
+\
+\
+-- Create table for producers and add foreign key and performing check to remove error entries \
+CREATE TABLE producer AS\
+SELECT person_id, ordering_1, title_id FROM \
+Principals WHERE category = 'producer' and \
+exists (select * from Name_Basics where Name_Basics.person_id = Principals.person_id)\
+      and exists (select * from Titles where Titles.title_ID = Principals.title_ID);\
+\
+ALTER TABLE producer ADD PRIMARY KEY (title_id, ordering_1),ADD FOREIGN KEY (title_id) references Titles(title_ID),\
+ADD FOREIGN KEY (person_id) REFERENCES Name_Basics(person_id)\
+\
+\
+\
+\
+}
